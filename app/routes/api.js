@@ -35,6 +35,8 @@ var firebase = require("firebase");
 // Get a reference to the database service
 
 
+
+
 var config = {
     apiKey: "AIzaSyATwye1E5wW7tUXIDd3oGfMWjIPk1qf34o",
     authDomain: "kruiz-4b38e.firebaseapp.com",
@@ -45,20 +47,33 @@ var config = {
   };
   firebase.initializeApp(config);
 
-var database = firebase.database();
 
- // firebase.auth().onAuthStateChanged(function(user) {
- //              if (user) {
 
- //                var getUser = firebase.auth().currentUser;
- //                 console.log(getUser);
- //              } else {
- //                // res.json({ success: false, message: errorMessage });
- //                console.log("JApa");
- //              }
- //            });
+// //  initializing cloud fire store
+// const admin = require('firebase-admin');
 
-  var userid ="";
+const functions = require('firebase-functions');
+const admin = require('firebase-admin');
+
+var serviceAccount = require("../models/serviceAccountKey.json");
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+  databaseURL: "https://kruiz-4b38e.firebaseio.com"
+});
+
+
+
+var db = admin.firestore();
+
+// trigger for onAuthLogin
+firebase.auth().onAuthStateChanged(function(user) {
+    if (user) {
+      // User is signed in.
+    } else {
+      // No user is signed in.
+    }
+  });
 
 module.exports = function(router) {
 
@@ -677,28 +692,69 @@ module.exports = function(router) {
 
         var password = req.body.password;
 
+        var user = firebase.auth().currentUser;
+
         firebase.auth().signInWithEmailAndPassword(email, password)
 
-        .then(function(user) {
-   // user signed in
+        .then(sucess=> {
+        // user signed in
 
-           
-        const getuid = functions.auth.user().onCreate( (user) => {
+        this.id = firebase.auth().currentUser.uid;
 
-                const id = user.uid.then(user => {
-                        const userID = user.getuid();
-                        console.log("this is user id " + userID); 
-                    return userID
-                })
+        if(id != null){
+            console.log("i have gooten the id " + id);
 
-                })
-                .catch((error) => {
-                response.status(500).send(error)
+            // ########################################################################################
+            // ########################################################################################
+                   
+                    var mrole = "Admin";
+                    var mstatus= "active";
 
-                })
+                    var docref = db.collection('city-kruiz').doc('users');
+                    var newUser = docref.set({
+                        Email: email,
+                       UserID: id,
+                        Role: "Admin",
+                        Status: "active"
+                    })
+                    
+                    .then(success =>{
+
+                        console.log("success");
+                        var token = jwt.sign({ Status:mstatus, email: email, uid:id, permission:mrole  }, secret, { expiresIn: '24h' }); // Logged in: Give user token
+            
+                        res.json({ success: true, message: 'User authenticated!', token: token }); // Return token in JSON object to controller
+            
+            
+                    })
+                    
+                    
+                    .catch(function(error) {
+
+                        console.log(error);
+
+                    });
+
+                    
+
+
+            // ########################################################################################
+            // // ########################################################################################
+
+            
+
+            
+        }
+        else{
+
+            console.log("i have no id " );
+            res.json({ success: false, message: errorMessage });
+
+        }
+        
                 
-                
-                
+        })
+     
                 
                 
                 // console.log("successfully" + user.uid);
@@ -708,15 +764,17 @@ module.exports = function(router) {
             //  res.json({ success: true, message: 'User authenticated!', token: token }); // Return token in JSON object to controller
         
         
-            })
+          
 
         .catch(function(error) {
               // Handle Errors here.
               var errorCode = error.code;
               var errorMessage = error.message;
               // ...
-               console.log(errorMessage);
-                res.json({ success: false, message: errorMessage });
+            //    console.log(errorMessage);
+            //     res.json({ success: false, message: errorMessage });
+
+            res.json({ success: false, message: error });
             });
 
 
@@ -1148,49 +1206,22 @@ module.exports = function(router) {
     // Route to get the current user's permission level
     router.get('/permission', function(req, res) {
 
-    firebase.auth().onAuthStateChanged(function(user) {
-         if (user) {
+        let permission = req.decoded.permission;
 
-             var getUser = firebase.auth().currentUser;
+        console.log("The user permission   " + permission);
+
+
+        if(permission != null){
             
-            var userid = getUser.uid;
-                
-              } else {
-                // res.json({ success: false, message: errorMessage });
-                console.log("JApa");
-              }
+            res.json({ success: true, permission: user.permission }); // Return the user's permission
 
-        });
-
-
-
-        // var userId = firebase.auth().currentUser.uid;
-        firebase.database().ref('/users/' + userid + '/Role').once('value')
-
-        .then(function(snapshot) {
-          var role = snapshot.val().Role;
-          // ...
-
-           if (role !=null) {
-                         res.json({ success: true, permission: role });
-                    }
-
-                    else{
-                         res.json({ success: false, message: 'No user was found' });
-                    }
         }
 
-        .catch(function(error) {
-                      // Handle Errors here.
-                      var errorCode = error.code;
-                      var errorMessage = error.message;
-                      // ...
-                       console.log(errorMessage);
-                        res.json({ success: false, message: errorMessage });
-                    })
+        else{
 
+            res.json({ success: false, message: 'No user was found' }); // Return an error
 
-        );
+        }
 
 
 
