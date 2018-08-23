@@ -47,24 +47,24 @@ var config = {
   };
   firebase.initializeApp(config);
 
-
+  var database = firebase.database();
 
 // //  initializing cloud fire store
 // const admin = require('firebase-admin');
 
-const functions = require('firebase-functions');
-const admin = require('firebase-admin');
+// const functions = require('firebase-functions');
+// const admin = require('firebase-admin');
 
-var serviceAccount = require("../models/serviceAccountKey.json");
+// var serviceAccount = require("../models/serviceAccountKey.json");
 
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-  databaseURL: "https://kruiz-4b38e.firebaseio.com"
-});
+// admin.initializeApp({
+//   credential: admin.credential.cert(serviceAccount),
+//   databaseURL: "https://kruiz-4b38e.firebaseio.com"
+// });
 
 
 
-var db = admin.firestore();
+// var db = admin.firestore();
 
 // trigger for onAuthLogin
 firebase.auth().onAuthStateChanged(function(user) {
@@ -710,30 +710,58 @@ module.exports = function(router) {
                     var mrole = "Admin";
                     var mstatus= "active";
 
-                    var docref = db.collection('city-kruiz').doc('users');
-                    var newUser = docref.set({
-                        Email: email,
-                       UserID: id,
-                        Role: "Admin",
-                        Status: "active"
-                    })
-                    
-                    .then(success =>{
+                // function writeUserData(id, email, mrole, mstatus){
+                    console.log("user email: " + email + " mrole: " + mrole + "mstatus " + mstatus + "id: " + id);
+                    firebase.database().ref('users/' + id).set({
 
+                        email: email,
+                        role: mrole,
+                        status: mstatus
+
+                    })
+                    .then(function(success) {
                         console.log("success");
                         var token = jwt.sign({ Status:mstatus, email: email, uid:id, permission:mrole  }, secret, { expiresIn: '24h' }); // Logged in: Give user token
             
                         res.json({ success: true, message: 'User authenticated!', token: token }); // Return token in JSON object to controller
-            
-            
+
                     })
-                    
-                    
                     .catch(function(error) {
 
                         console.log(error);
 
                     });
+
+                   
+                // }
+
+
+
+
+                    // var docref = db.collection('city-kruiz').doc('users');
+                    // var newUser = docref.set({
+                    //     Email: email,
+                    //    UserID: id,
+                    //     Role: "Admin",
+                    //     Status: "active"
+                    // })
+                    
+                    // .then(success =>{
+
+                    //     console.log("success");
+                    //     var token = jwt.sign({ Status:mstatus, email: email, uid:id, permission:mrole  }, secret, { expiresIn: '24h' }); // Logged in: Give user token
+            
+                    //     res.json({ success: true, message: 'User authenticated!', token: token }); // Return token in JSON object to controller
+            
+            
+                    // })
+                    
+                    
+                    // .catch(function(error) {
+
+                    //     console.log(error);
+
+                    // });
 
                     
 
