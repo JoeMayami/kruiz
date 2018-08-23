@@ -1,0 +1,26 @@
+
+
+
+
+        // var myUserId = firebase.auth().currentUser.uid; // You can uncomment it to get current userID
+
+    var mRole = "Admin"
+
+//Get all users with value mRole
+ var query = firebase.database().ref('path goes here' + myUserId).orderByValue('mRole');
+
+//Get all users with their role equares to mRole
+ var query2 = firebase.database().ref('path goes here' + myUserId).child('role').equaleTo('mRole');
+
+
+//Get all users limit to 50
+ var query3 = firebase.database().ref('users').limitToLast(50);
+
+//Get all users with child mRole
+ var query4 = firebase.database().ref('path goes here' + myUserId).orderByChild('mRole');
+
+
+//stop or call off query
+
+query.off()'
+ //

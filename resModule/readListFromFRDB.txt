@@ -1,0 +1,13 @@
+
+
+
+
+            firebase.database().ref.once('users', function(snapshot) {
+              snapshot.forEach(function(childSnapshot) {
+                var childKey = childSnapshot.key;
+                var childData = childSnapshot.val();
+                // ...
+
+                console.log("Let us see what data we have here " + childKey + "and here " + childData);
+              });
+            });
