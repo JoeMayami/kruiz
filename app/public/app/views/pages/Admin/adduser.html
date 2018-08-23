@@ -1,0 +1,119 @@
+
+		<div class="main">
+				<!-- MAIN CONTENT -->
+				<div class="main-content">
+					<div class="container-fluid">
+						<div class="row" >
+
+							<div class="col-md-3"></div>
+
+							<div class="col-md-6">
+								
+								<h3 style="text-align: center;"> Add Admin</h3>
+
+								 <div class="col-mx-auto show-hide-message" ng-show="register.successMsg || register.errorMsg" >
+						          
+						          <div ng-class="alert">
+						            
+						            <p>{{ register.successMsg || register.errorMsg }}</p>
+						          </div>
+						        </div>
+
+
+								<div class="panel-body">
+
+									 <form class="needs-validation" name="regForm" ng-submit="register.regUser(regData, regForm.$valid);" id="contactForm" novalidate>
+
+
+
+
+									<div>
+										
+
+										 <div ng-class="{ 'has-success':(regForm.email.$valid && !regForm.email.$pristine && !register.emailInvalid), 'has-error':(!regForm.email.$valid && !regForm.email.$pristine) || (!regForm.email.$valid && regForm.$submitted) || register.emailInvalid }">
+
+              <label for="email">Email <span class="text-muted"></span></label>
+              <input type="email" class="form-control" id="email" placeholder="you@example.com"ng-disabled="register.disabled" name="email" ng-model="register.regData.email" ng-minlength="3" ng-maxlength="40" ng-pattern="/^[a-zA-Z0-9._%-]+@[a-zA-Z0-9.-]+.[a-zA-Z]{2,4}$/" ng-blur="register.checkEmail(regData);" required>
+
+               <p class="text-danger" ng-show="(!regForm.email.$pristine && regForm.email.$error.required) || (regForm.$submitted && regForm.email.$error.required)">This field is required</p>
+                                    <span ng-show="register.checkingEmail && regForm.email.$valid" class="glyphicon glyphicon-repeat"></span>
+                                    <p class="text-success" ng-show="register.emailMsg && !regForm.email.$error.required && regForm.email.$valid">{{ register.emailMsg }}</p>
+                                    <ul ng-show="(!regForm.email.$pristine && regForm.email.$error.pattern) || (!regForm.email.$pristine && regForm.email.$error.minlength) || (!regForm.email.$pristine && regForm.email.$error.maxlength)" class="text-danger">
+                                        <li>Must contain "@"</li>
+                                        <li>Must not contain any special characters</li>
+                                        <li>Must be at least 3 characters but no more than 25</li>
+                                    </ul>
+	
+									</div>
+
+									<!-- email -->
+
+
+									
+									<div>
+						
+
+									          <label for="Select">Select User Role</label>
+									<select class="form-control" 
+									 name="permission" ng-model="register.regData.permission" ng-disabled="register.disabled"  >
+
+										 <option ng-repeat="item in register.Admin_items" value="{{item.value}}">{{item.display}}</option>
+										
+									</select>
+
+									<br>
+
+									<div class="animate-switch-container"
+									    ng-switch on="register.regData.permission">
+									      <div class="animate-switch" ng-switch-when="settings|options" ng-switch-when-separator="|">Settings Div</div>
+									     
+									       
+									      <div class="animate-switch" ng-switch-when="Admin">
+
+									      		
+									      	<button type="submit" class=" btn btn-primary btn-lg btn-block "    > Add Admin</a>
+
+
+									      </div>
+
+									      <div class="animate-switch" ng-switch-when="Sub-admin">
+
+									      		
+									      	<button type="submit" class=" btn btn-primary btn-lg btn-block "    > Add Sub-admin</a>
+
+
+									      </div>
+									  </div>
+
+									<br>
+
+
+					</div>					
+									
+
+
+
+									<!-- password -->
+									
+
+									<!-- Confirm password -->
+
+
+<!-- <input type="text" class="form-control" id="permission" placeholder="Password" ng-disabled="register.disabled"  name="permission"  ng-model="register.regData.permission" >
+<br>
+ -->
+
+					
+								</div>
+					</div>
+
+					<div class="col-md-3"></div>
+							</div>
+							
+						</div>
+
+
+				</div>
+		</div>
+
+<!-- 	</body>

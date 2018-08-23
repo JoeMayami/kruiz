@@ -1,0 +1,109 @@
+
+		<div class="main">
+				<!-- MAIN CONTENT -->
+				<div class="main-content">
+					<div class="container-fluid">
+						<div class="row" >
+
+							<div class="col-md-3"></div>
+
+							<div class="col-md-6">
+								
+								<h3 style="text-align: center;"> Generate License</h3>
+
+								 <div class="col-mx-auto show-hide-message" ng-show="register.successMsg || register.errorMsg" >
+						          
+						          <div ng-class="alert">
+						            
+						            <p>{{ register.successMsg || register.errorMsg }}</p>
+						          </div>
+						        </div>
+
+
+								<div class="panel-body">
+
+									 <form class="needs-validation" name="regForm" ng-submit="register.generateLicense(licenseData);" id="contactForm" novalidate>
+
+
+									 	
+									
+									
+
+
+
+									<div>
+										
+
+				
+
+              <label for="number">Subscription Period <span class="text-muted"></span></label>
+              <input type="number" class="form-control" name="subPeriod" ng-model="register.licenseData.subPeriod" required> <span> Year </span>
+
+						
+
+									          <label for="Select">Select User Role</label>
+									<select class="form-control" 
+									 name="role" ng-model="register.licenseData.role" ng-disabled="register.disabled"  >
+
+										 <option ng-repeat="item in register.License_items" value="{{item.value}}">{{item.display}}</option>
+										
+									</select>
+
+									<br>
+
+									<div class="animate-switch-container"
+									    ng-switch on="register.licenseData.role">
+									      <div class="animate-switch" ng-switch-when="settings|options" ng-switch-when-separator="|">Settings Div</div>
+									     
+
+									      <div class="animate-switch" ng-switch-when="Owner">
+
+
+									      	<button type="submit" class=" btn btn-primary btn-lg btn-block "   > Generate Owner's Key</a>
+
+									    
+									       </div>
+
+									       <div class="animate-switch" ng-switch-when="Franchise">
+
+
+									      	<button type="submit" class=" btn btn-primary btn-lg btn-block "   > Generate Franchise's Key</a>
+
+									    
+									       </div>
+
+
+									       </div>
+
+									<br>
+
+
+					</div>					
+									
+
+
+
+									<!-- password -->
+									
+
+									<!-- Confirm password -->
+
+
+<!-- <input type="text" class="form-control" id="permission" placeholder="Password" ng-disabled="register.disabled"  name="permission"  ng-model="register.regData.permission" >
+<br>
+ -->
+
+					
+								</div>
+					</div>
+
+					<div class="col-md-3"></div>
+							</div>
+							
+						</div>
+
+
+				</div>
+		</div>
+
+<!-- 	</body>
