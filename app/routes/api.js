@@ -47,24 +47,24 @@ var config = {
   };
   firebase.initializeApp(config);
 
-
+  var database = firebase.database();
 
 // //  initializing cloud fire store
 // const admin = require('firebase-admin');
 
-const functions = require('firebase-functions');
-const admin = require('firebase-admin');
+// const functions = require('firebase-functions');
+// const admin = require('firebase-admin');
 
-var serviceAccount = require("../models/serviceAccountKey.json");
+// var serviceAccount = require("../models/serviceAccountKey.json");
 
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-  databaseURL: "https://kruiz-4b38e.firebaseio.com"
-});
+// admin.initializeApp({
+//   credential: admin.credential.cert(serviceAccount),
+//   databaseURL: "https://kruiz-4b38e.firebaseio.com"
+// });
 
 
 
-var db = admin.firestore();
+// var db = admin.firestore();
 
 // trigger for onAuthLogin
 firebase.auth().onAuthStateChanged(function(user) {
@@ -172,6 +172,80 @@ module.exports = function(router) {
     });
 
 
+
+    router.post('/License', function(req, res){
+
+        console.log('lices');
+        if(req != null){
+
+            if(req.body.role != null && req.body.subPeriod != null){
+            
+                var subPeriod = req.body.subPeriod;
+
+                var role = req.body.role;
+
+                 var generateLicenseToken = jwt.sign({ Role:role, subPeriod: subPeriod}, secret);
+
+
+                var generatedDate = new Date().getTime();
+
+                var temp_day = new Date().getDate();
+
+                var temp_month = new Date().getMonth();
+
+                var temp_year= new Date().getYear();
+
+                var temp_hour = new Date().getHours();
+
+                 var temp_minute = new Date().getMinutes();
+
+                 var temp_second = new Date().getSeconds();
+
+        const expiredDate = function toTimestamp(year,month,day,hour,minute,second){
+             var datum = new Date(Date.UTC(temp_year +1,temp_month,temp_day,temp_hour,temp_minute,temp_second));
+             return datum.getTime()/1000;
+            }
+ 
+        var licenseKey = generateLicenseToken;
+
+            firebase.database().ref('licenseKey' + licenseKey ).set({
+                role: role,
+                 subPeriod: subPeriod,
+                  licenseKey :licenseKey,
+                  generatedDate: generatedDate,
+                  status: "fresh",
+                  expiredDate:expiredDate,
+                  users:5,
+                  limit:0,
+
+
+              })
+            .then(success => {
+
+                res.json({success:true, message:"License created"});
+
+            })
+
+            .catch( function(error){
+
+                res.json({success:false, message:"Error in creating License "  + error});
+
+
+               });
+
+                }
+                else{
+                    res.json({success:false, message:"Fields are empty"});
+                }
+    
+
+        }
+              
+
+    });
+
+
+
  router.post('/active', function(req, res) {
         var user = new User(); // Create new User object
         user.email = req.body.email; // Save email from request to User object
@@ -269,6 +343,9 @@ module.exports = function(router) {
         }
     });
 
+
+
+ 
 
 
      router.post('/setprofile/:id',upload.any(), function(req, res) {
@@ -580,7 +657,29 @@ module.exports = function(router) {
 
 
 
+    router.post('/getresetlink', function(req,res){
 
+
+
+           var auth = firebase.auth();
+                        var emailAddress = req.body.email;
+
+
+
+                        auth.sendPasswordResetEmail(emailAddress).then(function() {
+                          // Email sent.
+                          console.log(" Email sent ");
+                          res.json({ success: true, message: 'ok' });
+                        }).catch(function(error) {
+                          // An error happened.
+                            console.log(error);
+
+                            res.json({ success: false, message: 'error' });
+                        });
+
+
+
+    })
 
 
 
@@ -710,30 +809,58 @@ module.exports = function(router) {
                     var mrole = "Admin";
                     var mstatus= "active";
 
-                    var docref = db.collection('city-kruiz').doc('users');
-                    var newUser = docref.set({
-                        Email: email,
-                       UserID: id,
-                        Role: "Admin",
-                        Status: "active"
-                    })
-                    
-                    .then(success =>{
+                // function writeUserData(id, email, mrole, mstatus){
+                    console.log("user email: " + email + " mrole: " + mrole + "mstatus " + mstatus + "id: " + id);
+                    firebase.database().ref('users/' + id).set({
 
+                        email: email,
+                        role: mrole,
+                        status: mstatus
+
+                    })
+                    .then(function(success) {
                         console.log("success");
                         var token = jwt.sign({ Status:mstatus, email: email, uid:id, permission:mrole  }, secret, { expiresIn: '24h' }); // Logged in: Give user token
             
                         res.json({ success: true, message: 'User authenticated!', token: token }); // Return token in JSON object to controller
-            
-            
+
                     })
-                    
-                    
                     .catch(function(error) {
 
                         console.log(error);
 
                     });
+
+                   
+                // }
+
+
+
+
+                    // var docref = db.collection('city-kruiz').doc('users');
+                    // var newUser = docref.set({
+                    //     Email: email,
+                    //    UserID: id,
+                    //     Role: "Admin",
+                    //     Status: "active"
+                    // })
+                    
+                    // .then(success =>{
+
+                    //     console.log("success");
+                    //     var token = jwt.sign({ Status:mstatus, email: email, uid:id, permission:mrole  }, secret, { expiresIn: '24h' }); // Logged in: Give user token
+            
+                    //     res.json({ success: true, message: 'User authenticated!', token: token }); // Return token in JSON object to controller
+            
+            
+                    // })
+                    
+                    
+                    // .catch(function(error) {
+
+                    //     console.log(error);
+
+                    // });
 
                     
 
@@ -970,61 +1097,66 @@ module.exports = function(router) {
 
     // Route to send reset link to the user
     router.put('/resetpassword', function(req, res) {
-        User.findOne({ email: req.body.email }).select('username active email resettoken name').exec(function(err, user) {
-            if (err) {
-                // Create an e-mail object that contains the error. Set to automatically send it to myself for troubleshooting.
-                // var email = {
-                //     from: 'MEAN Stack Staff, cruiserweights@zoho.com',
-                //     to: 'gugui3z24@gmail.com',
-                //     subject: 'Error Logged',
-                //     text: 'The following error has been reported in the MEAN Stack Application: ' + err,
-                //     html: 'The following error has been reported in the MEAN Stack Application:<br><br>' + err
-                // };
-                // Function to send e-mail to myself
-                // client.sendMail(email, function(err, info) {
-                //     if (err) {
-                //         console.log(err); // If error with sending e-mail, log to console/terminal
-                //     } else {
-                //         console.log(info); // Log success message to console if sent
-                //         console.log(user.email); // Display e-mail that it was sent to
-                //     }
-                // });
-                res.json({ success: false, message: 'Something went wrong. This error has been logged and will be addressed by our staff. We apologize for this inconvenience!' });
-            } else {
-                if (!user) {
-                    res.json({ success: false, message: 'Email was not found' }); // Return error if username is not found in database
-                } else if (!user.active) {
-                    res.json({ success: false, message: 'Account has not yet been activated' }); // Return error if account is not yet activated
-                } else {
-                    user.resettoken = jwt.sign({ username: user.username, email: user.email }, secret, { expiresIn: '24h' }); // Create a token for activating account through e-mail
-                    // Save token to user in database
-                    user.save(function(err) {
-                        if (err) {
-                            res.json({ success: false, message: err }); // Return error if cannot connect
-                        } else {
-                            // Create e-mail object to send to user
-                            var email = {
-                                from: 'MEAN Stack Staff, cruiserweights@zoho.com',
-                                to: user.email,
-                                subject: 'Reset Password Request',
-                                text: 'Hello ' + user.name + ', You recently request a password reset link. Please click on the link below to reset your password:<br><br><a href="http://www.herokutestapp3z24.com/reset/' + user.resettoken,
-                                html: 'Hello<strong> ' + user.name + '</strong>,<br><br>You recently request a password reset link. Please click on the link below to reset your password:<br><br><a href="http://www.herokutestapp3z24.com/reset/' + user.resettoken + '">http://www.herokutestapp3z24.com/reset/</a>'
-                            };
-                            // Function to send e-mail to the user
-                            client.sendMail(email, function(err, info) {
-                                if (err) {
-                                    console.log(err); // If error with sending e-mail, log to console/terminal
-                                } else {
-                                    console.log(info); // Log success message to console
-                                    console.log('sent to: ' + user.email); // Log e-mail
-                                }
-                            });
-                            res.json({ success: true, message: 'Please Click reset link' + user.resettoken }); // Return success message
-                        }
-                    });
-                }
-            }
-        });
+
+
+           
+
+
+        // User.findOne({ email: req.body.email }).select('username active email resettoken name').exec(function(err, user) {
+        //     if (err) {
+        //         // Create an e-mail object that contains the error. Set to automatically send it to myself for troubleshooting.
+        //         // var email = {
+        //         //     from: 'MEAN Stack Staff, cruiserweights@zoho.com',
+        //         //     to: 'gugui3z24@gmail.com',
+        //         //     subject: 'Error Logged',
+        //         //     text: 'The following error has been reported in the MEAN Stack Application: ' + err,
+        //         //     html: 'The following error has been reported in the MEAN Stack Application:<br><br>' + err
+        //         // };
+        //         // Function to send e-mail to myself
+        //         // client.sendMail(email, function(err, info) {
+        //         //     if (err) {
+        //         //         console.log(err); // If error with sending e-mail, log to console/terminal
+        //         //     } else {
+        //         //         console.log(info); // Log success message to console if sent
+        //         //         console.log(user.email); // Display e-mail that it was sent to
+        //         //     }
+        //         // });
+        //         res.json({ success: false, message: 'Something went wrong. This error has been logged and will be addressed by our staff. We apologize for this inconvenience!' });
+        //     } else {
+        //         if (!user) {
+        //             res.json({ success: false, message: 'Email was not found' }); // Return error if username is not found in database
+        //         } else if (!user.active) {
+        //             res.json({ success: false, message: 'Account has not yet been activated' }); // Return error if account is not yet activated
+        //         } else {
+        //             user.resettoken = jwt.sign({ username: user.username, email: user.email }, secret, { expiresIn: '24h' }); // Create a token for activating account through e-mail
+        //             // Save token to user in database
+        //             user.save(function(err) {
+        //                 if (err) {
+        //                     res.json({ success: false, message: err }); // Return error if cannot connect
+        //                 } else {
+        //                     // Create e-mail object to send to user
+        //                     var email = {
+        //                         from: 'MEAN Stack Staff, cruiserweights@zoho.com',
+        //                         to: user.email,
+        //                         subject: 'Reset Password Request',
+        //                         text: 'Hello ' + user.name + ', You recently request a password reset link. Please click on the link below to reset your password:<br><br><a href="http://www.herokutestapp3z24.com/reset/' + user.resettoken,
+        //                         html: 'Hello<strong> ' + user.name + '</strong>,<br><br>You recently request a password reset link. Please click on the link below to reset your password:<br><br><a href="http://www.herokutestapp3z24.com/reset/' + user.resettoken + '">http://www.herokutestapp3z24.com/reset/</a>'
+        //                     };
+        //                     // Function to send e-mail to the user
+        //                     client.sendMail(email, function(err, info) {
+        //                         if (err) {
+        //                             console.log(err); // If error with sending e-mail, log to console/terminal
+        //                         } else {
+        //                             console.log(info); // Log success message to console
+        //                             console.log('sent to: ' + user.email); // Log e-mail
+        //                         }
+        //                     });
+        //                     res.json({ success: true, message: 'Please Click reset link' + user.resettoken }); // Return success message
+        //                 }
+        //             });
+        //         }
+        //     }
+        // });
     });
 
     // Route to verify user's e-mail activation link
@@ -1146,27 +1278,9 @@ module.exports = function(router) {
 
     // Route to get the currently logged in user
     router.post('/me', function(req, res) {
-
-        // firebase.auth().onAuthStateChanged(function(user) {
-        //  if (user) {
-
-        //      var getUser = firebase.auth().currentUser;
-            
-        //     userid = getUser.uid;
-                
-        //       } else {
-        //         // res.json({ success: false, message: errorMessage });
-        //         console.log("JApa");
-        //       }
-
-        // });
-
+   
         res.send(req.decoded); // Return the token acquired from middleware
-
-
-
-
-        
+     
     });
 
     // Route to provide the user with a new token to renew session
@@ -1206,14 +1320,15 @@ module.exports = function(router) {
     // Route to get the current user's permission level
     router.get('/permission', function(req, res) {
 
-        let permission = req.decoded.permission;
+        var permission = req.decoded;
 
-        console.log("The user permission   " + permission);
+        // console.log("The user permission   " + permission);
 
 
         if(permission != null){
             
-            res.json({ success: true, permission: user.permission }); // Return the user's permission
+             console.log("The user permission   " + permission);
+            res.json({ success: true, message:permission }); // Return the user's permission
 
         }
 
@@ -1224,14 +1339,30 @@ module.exports = function(router) {
         }
 
 
-
-
        
+    });
+
+    // Route to get all users for management page
+    router.get('/management', function(req, res) {
+
+        var permission = req.decoded.permission;
+
+    if (permission === 'Admin' || permission === 'Sub-admin' || permission === 'Franchise' || permission === 'Owner') {
+                                // Check if users were retrieved from database
+                                if (!permission) {
+                                    res.json({ success: false, message: 'Users not found' }); // Return error
+                                } else {
+                                    res.json({ success: true,  permission:permission }); // Return users, along with current user's permission
+                                }
+                            } else {
+                                res.json({ success: false, message: 'Insufficient Permissions' }); // Return access error
+                            }
+                        });
 
 
 
 
-        // User.findOne({ username: req.decoded.username }, function(err, user) {
+        // User.find({}, function(err, users) {
         //     if (err) {
         //         // Create an e-mail object that contains the error. Set to automatically send it to myself for troubleshooting.
         //         var email = {
@@ -1252,143 +1383,110 @@ module.exports = function(router) {
         //         });
         //         res.json({ success: false, message: 'Something went wrong. This error has been logged and will be addressed by our staff. We apologize for this inconvenience!' });
         //     } else {
-        //         // Check if username was found in database
-        //         if (!user) {
-        //             res.json({ success: false, message: 'No user was found' }); // Return an error
-        //         } else {
-        //             res.json({ success: true, permission: user.permission }); // Return the user's permission
-        //         }
+        //         User.findOne({ username: req.decoded.username }, function(err, mainUser) {
+        //             if (err) {
+        //                 // Create an e-mail object that contains the error. Set to automatically send it to myself for troubleshooting.
+        //                 var email = {
+        //                     from: 'MEAN Stack Staff, cruiserweights@zoho.com',
+        //                     to: 'gugui3z24@gmail.com',
+        //                     subject: 'Error Logged',
+        //                     text: 'The following error has been reported in the MEAN Stack Application: ' + err,
+        //                     html: 'The following error has been reported in the MEAN Stack Application:<br><br>' + err
+        //                 };
+        //                 // Function to send e-mail to myself
+        //                 client.sendMail(email, function(err, info) {
+        //                     if (err) {
+        //                         console.log(err); // If error with sending e-mail, log to console/terminal
+        //                     } else {
+        //                         console.log(info); // Log success message to console if sent
+        //                         console.log(user.email); // Display e-mail that it was sent to
+        //                     }
+        //                 });
+        //                 res.json({ success: false, message: 'Something went wrong. This error has been logged and will be addressed by our staff. We apologize for this inconvenience!' });
+        //             } else {
+        //                 // Check if logged in user was found in database
+        //                 if (!mainUser) {
+        //                     res.json({ success: false, message: 'No user found' }); // Return error
+        //                 } else {
+        //                     // Check if user has editing/deleting privileges
+        //                     if (mainUser.permission === 'admin' || mainUser.permission === 'moderator') {
+        //                         // Check if users were retrieved from database
+        //                         if (!users) {
+        //                             res.json({ success: false, message: 'Users not found' }); // Return error
+        //                         } else {
+        //                             res.json({ success: true, users: users, permission: mainUser.permission }); // Return users, along with current user's permission
+        //                         }
+        //                     } else {
+        //                         res.json({ success: false, message: 'Insufficient Permissions' }); // Return access error
+        //                     }
+        //                 }
+        //             }
+        //         });
         //     }
         // });
-    });
-
-    // Route to get all users for management page
-    router.get('/management', function(req, res) {
-        User.find({}, function(err, users) {
-            if (err) {
-                // Create an e-mail object that contains the error. Set to automatically send it to myself for troubleshooting.
-                var email = {
-                    from: 'MEAN Stack Staff, cruiserweights@zoho.com',
-                    to: 'gugui3z24@gmail.com',
-                    subject: 'Error Logged',
-                    text: 'The following error has been reported in the MEAN Stack Application: ' + err,
-                    html: 'The following error has been reported in the MEAN Stack Application:<br><br>' + err
-                };
-                // Function to send e-mail to myself
-                client.sendMail(email, function(err, info) {
-                    if (err) {
-                        console.log(err); // If error with sending e-mail, log to console/terminal
-                    } else {
-                        console.log(info); // Log success message to console if sent
-                        console.log(user.email); // Display e-mail that it was sent to
-                    }
-                });
-                res.json({ success: false, message: 'Something went wrong. This error has been logged and will be addressed by our staff. We apologize for this inconvenience!' });
-            } else {
-                User.findOne({ username: req.decoded.username }, function(err, mainUser) {
-                    if (err) {
-                        // Create an e-mail object that contains the error. Set to automatically send it to myself for troubleshooting.
-                        var email = {
-                            from: 'MEAN Stack Staff, cruiserweights@zoho.com',
-                            to: 'gugui3z24@gmail.com',
-                            subject: 'Error Logged',
-                            text: 'The following error has been reported in the MEAN Stack Application: ' + err,
-                            html: 'The following error has been reported in the MEAN Stack Application:<br><br>' + err
-                        };
-                        // Function to send e-mail to myself
-                        client.sendMail(email, function(err, info) {
-                            if (err) {
-                                console.log(err); // If error with sending e-mail, log to console/terminal
-                            } else {
-                                console.log(info); // Log success message to console if sent
-                                console.log(user.email); // Display e-mail that it was sent to
-                            }
-                        });
-                        res.json({ success: false, message: 'Something went wrong. This error has been logged and will be addressed by our staff. We apologize for this inconvenience!' });
-                    } else {
-                        // Check if logged in user was found in database
-                        if (!mainUser) {
-                            res.json({ success: false, message: 'No user found' }); // Return error
-                        } else {
-                            // Check if user has editing/deleting privileges
-                            if (mainUser.permission === 'admin' || mainUser.permission === 'moderator') {
-                                // Check if users were retrieved from database
-                                if (!users) {
-                                    res.json({ success: false, message: 'Users not found' }); // Return error
-                                } else {
-                                    res.json({ success: true, users: users, permission: mainUser.permission }); // Return users, along with current user's permission
-                                }
-                            } else {
-                                res.json({ success: false, message: 'Insufficient Permissions' }); // Return access error
-                            }
-                        }
-                    }
-                });
-            }
-        });
-    });
+ 
 
     // Route to delete a user
     router.delete('/management/:username', function(req, res) {
-        var deletedUser = req.params.username; // Assign the username from request parameters to a variable
-        User.findOne({ username: req.decoded.username }, function(err, mainUser) {
-            if (err) {
-                // Create an e-mail object that contains the error. Set to automatically send it to myself for troubleshooting.
-                var email = {
-                    from: 'MEAN Stack Staff, cruiserweights@zoho.com',
-                    to: 'gugui3z24@gmail.com',
-                    subject: 'Error Logged',
-                    text: 'The following error has been reported in the MEAN Stack Application: ' + err,
-                    html: 'The following error has been reported in the MEAN Stack Application:<br><br>' + err
-                };
-                // Function to send e-mail to myself
-                client.sendMail(email, function(err, info) {
-                    if (err) {
-                        console.log(err); // If error with sending e-mail, log to console/terminal
-                    } else {
-                        console.log(info); // Log success message to console if sent
-                        console.log(user.email); // Display e-mail that it was sent to
-                    }
-                });
-                res.json({ success: false, message: 'Something went wrong. This error has been logged and will be addressed by our staff. We apologize for this inconvenience!' });
-            } else {
-                // Check if current user was found in database
-                if (!mainUser) {
-                    res.json({ success: false, message: 'No user found' }); // Return error
-                } else {
-                    // Check if curent user has admin access
-                    if (mainUser.permission !== 'admin') {
-                        res.json({ success: false, message: 'Insufficient Permissions' }); // Return error
-                    } else {
-                        // Fine the user that needs to be deleted
-                        User.findOneAndRemove({ username: deletedUser }, function(err, user) {
-                            if (err) {
-                                // Create an e-mail object that contains the error. Set to automatically send it to myself for troubleshooting.
-                                var email = {
-                                    from: 'MEAN Stack Staff, cruiserweights@zoho.com',
-                                    to: 'gugui3z24@gmail.com',
-                                    subject: 'Error Logged',
-                                    text: 'The following error has been reported in the MEAN Stack Application: ' + err,
-                                    html: 'The following error has been reported in the MEAN Stack Application:<br><br>' + err
-                                };
-                                // Function to send e-mail to myself
-                                client.sendMail(email, function(err, info) {
-                                    if (err) {
-                                        console.log(err); // If error with sending e-mail, log to console/terminal
-                                    } else {
-                                        console.log(info); // Log success message to console if sent
-                                        console.log(user.email); // Display e-mail that it was sent to
-                                    }
-                                });
-                                res.json({ success: false, message: 'Something went wrong. This error has been logged and will be addressed by our staff. We apologize for this inconvenience!' });
-                            } else {
-                                res.json({ success: true }); // Return success status
-                            }
-                        });
-                    }
-                }
-            }
-        });
+        // var deletedUser = req.params.username; // Assign the username from request parameters to a variable
+        // User.findOne({ username: req.decoded.username }, function(err, mainUser) {
+        //     if (err) {
+        //         // Create an e-mail object that contains the error. Set to automatically send it to myself for troubleshooting.
+        //         var email = {
+        //             from: 'MEAN Stack Staff, cruiserweights@zoho.com',
+        //             to: 'gugui3z24@gmail.com',
+        //             subject: 'Error Logged',
+        //             text: 'The following error has been reported in the MEAN Stack Application: ' + err,
+        //             html: 'The following error has been reported in the MEAN Stack Application:<br><br>' + err
+        //         };
+        //         // Function to send e-mail to myself
+        //         client.sendMail(email, function(err, info) {
+        //             if (err) {
+        //                 console.log(err); // If error with sending e-mail, log to console/terminal
+        //             } else {
+        //                 console.log(info); // Log success message to console if sent
+        //                 console.log(user.email); // Display e-mail that it was sent to
+        //             }
+        //         });
+        //         res.json({ success: false, message: 'Something went wrong. This error has been logged and will be addressed by our staff. We apologize for this inconvenience!' });
+        //     } else {
+        //         // Check if current user was found in database
+        //         if (!mainUser) {
+        //             res.json({ success: false, message: 'No user found' }); // Return error
+        //         } else {
+        //             // Check if curent user has admin access
+        //             if (mainUser.permission !== 'admin') {
+        //                 res.json({ success: false, message: 'Insufficient Permissions' }); // Return error
+        //             } else {
+        //                 // Fine the user that needs to be deleted
+        //                 User.findOneAndRemove({ username: deletedUser }, function(err, user) {
+        //                     if (err) {
+        //                         // Create an e-mail object that contains the error. Set to automatically send it to myself for troubleshooting.
+        //                         var email = {
+        //                             from: 'MEAN Stack Staff, cruiserweights@zoho.com',
+        //                             to: 'gugui3z24@gmail.com',
+        //                             subject: 'Error Logged',
+        //                             text: 'The following error has been reported in the MEAN Stack Application: ' + err,
+        //                             html: 'The following error has been reported in the MEAN Stack Application:<br><br>' + err
+        //                         };
+        //                         // Function to send e-mail to myself
+        //                         client.sendMail(email, function(err, info) {
+        //                             if (err) {
+        //                                 console.log(err); // If error with sending e-mail, log to console/terminal
+        //                             } else {
+        //                                 console.log(info); // Log success message to console if sent
+        //                                 console.log(user.email); // Display e-mail that it was sent to
+        //                             }
+        //                         });
+        //                         res.json({ success: false, message: 'Something went wrong. This error has been logged and will be addressed by our staff. We apologize for this inconvenience!' });
+        //                     } else {
+        //                         res.json({ success: true }); // Return success status
+        //                     }
+        //                 });
+        //             }
+        //         }
+        //     }
+        // });
     });
 
     // Route to get the user that needs to be edited

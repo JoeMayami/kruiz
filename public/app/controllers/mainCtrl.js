@@ -9,8 +9,27 @@ angular.module('mainController', ['authServices', 'userServices'])
     app.Id = $location.url();
 app.getId = app.Id.substr(app.Id.indexOf("=") + 1);
 
+app.login=true;
+app.forget=false;
+app.activate=false;
 
+app.showforget = function() {
+    app.login = false;
+    app.activate=false;
+    app.forget=true;
+  };
 
+  app.showlogin = function() {
+    app.forget = false;
+    app.activate=false;
+    app.login=true;
+  };
+
+   app.showactivate = function() {
+    app.forget = false;
+    app.login=false;
+    app.activate=true;
+  };
 
 
     if ($window.location.pathname === '/') app.home = true; // Check if user is on home page to show home page div
@@ -139,15 +158,15 @@ app.getId = app.Id.substr(app.Id.indexOf("=") + 1);
         if (Auth.isLoggedIn()) {
             // Custom function to retrieve user data
             Auth.getUser().then(function(data) {
-                if (data.data.username === undefined) {
+                if (data.data.email === undefined) {
                     app.isLoggedIn = false; // Variable to deactivate ng-show on index
                     Auth.logout();
                     app.isLoggedIn = false;
                     $location.path('/');
                 } else {
                     app.isLoggedIn = true; // Variable to activate ng-show on index
-                    app.username = data.data.username; // Get the user name for use in index
-                    checkLoginStatus = data.data.username;
+                    app.email = data.data.email; // Get the user name for use in index
+                    checkLoginStatus = data.data.email;
                     app.useremail = data.data.email; // Get the user e-mail for us ein index
                     User.getPermission().then(function(data) {
                         if (data.data.permission === 'Admin' || data.data.permission === 'moderator') {
@@ -188,6 +207,58 @@ app.getId = app.Id.substr(app.Id.indexOf("=") + 1);
         app.disabled = true;
         $window.location = $window.location.protocol + '//' + $window.location.host + '/auth/google';
     };
+
+
+     this.doReset = function(resetData) {
+
+        console.log("am in the do reset");
+
+        app.disabled = true; // Disable the form when user submits to prevent multiple requests to server
+        app.loading = true; // Activate bootstrap loading icon
+        app.errorMsg = false; // Clear errorMsg each time user submits
+
+        console.log(app.resetData);
+        // If form is valid and passwords match, attempt to create user         
+        if (app.resetData) {
+            
+            // Runs custom function that does password reset 
+            User.getResetLink(app.resetData).then(function(data) {
+                // Check if reset was sucessful
+                if (data.data.success) {
+
+                
+                    app.loading = false; // Stop bootstrap loading icon
+                    $scope.alert = 'alert alert-success'; // Set class for message
+                              
+                    app.successMsg = data.data.message + 'Email sent'; // If successful, grab message from JSON object and redirect to login page
+                    // Redirect after 2000 milliseconds (2 seconds)
+                    $timeout(function() {
+                 
+
+                          $location.path( "/");
+
+                    }, 2000);
+
+                } else {
+                    app.loading = false; // Stop bootstrap loading icon
+                    app.disabled = false; // If error occurs, remove disable lock from form
+                    $scope.alert = 'alert alert-danger'; // Set class for message
+                    app.errorMsg = data.data.message; // If not successful, grab message from JSON object
+                }
+            });
+
+        } else {
+            app.disabled = false; // If error occurs, remove disable lock from form
+            app.loading = false; // Stop bootstrap loading icon
+            $scope.alert = 'alert alert-danger'; // Set class for message
+            app.errorMsg = 'Please ensure form is filled our properly'; // Display error if valid returns false
+        }
+
+
+            
+
+    };
+
 
 
 

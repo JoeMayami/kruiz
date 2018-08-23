@@ -1,0 +1,59 @@
+<div ng-show="!main.isLoggedIn"  ng-init="forget=false">
+
+                  <div  id="wrapper" ng-hide="forget=true">
+                        <div class="vertical-align-wrap" style="margin-top: 100px;">
+                            <div class="vertical-align-middle">
+                                <div class="auth-box ">
+                                    <div class="left">
+                                        <div class="content">
+                                            <div class="header">
+                                                <div class="logo text-center">
+                                                    <h3> City Kruiz</h3>
+                                                </div>
+                                                <p class="lead">Reset Password</p>
+                                            </div>
+
+                                            
+                        <!-- Custom Messages -->
+                        <div class="row show-hide-message" ng-show="main.successMsg || main.errorMsg || facebook.errorMsg || twitter.errorMsg || google.errorMsg">
+                            <div ng-class="alert">{{ main.successMsg || main.errorMsg || facebook.errorMsg || twitter.errorMsg || google.errorMsg }}</div>&nbsp
+                            
+                        </div>
+                                        <form class="form-auth-small" name="sentMessage" id="contactForm" ng-submit="main.doLogin(loginData);" novalidate>
+                                                <div class="form-group">
+                                                    <label for="signin-email" class="control-label sr-only">Email</label>
+                                                    <input type="email" class="form-control" id="signin-email"  placeholder="Email"  ng-model="main.loginData.email" autocomplete="off">
+                                                </div>
+
+                                            <button  class="btn btn-primary btn-lg btn-block"
+                                                type="submit">Send Reset Link </button>
+                                                
+                                                <div class="bottom">
+                                                    <span class="helper-text"><i class="fa fa-lock"></i> <a href="#" ng-click="forget=true"> Remeber my password? Login</a></span>
+                                                </div>
+
+
+                                                
+
+                                                    </span>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                    <div class="right">
+                                        <div class="overlay"></div>
+                                        <div class="content text">
+                                            
+                                        </div>
+                                    </div>
+                                    <div class="clearfix"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- END WRAPPER -->
+                </div>
+            
+
+
+                  

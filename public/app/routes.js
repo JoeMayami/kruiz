@@ -12,6 +12,7 @@ var app = angular.module('appRoutes', ['ngRoute'])
         authenticated: true
     })
 
+       
     .when('/adduser', {
         templateUrl: 'app/views/pages/Admin/adduser.html',
         controller: 'regCtrl',
@@ -64,6 +65,13 @@ var app = angular.module('appRoutes', ['ngRoute'])
         authenticated: true
     })
 
+    .when('/generateLicense',{
+            templateUrl:'app/views/pages/Admin/generateLicense.html',
+            controller: 'regCtrl',
+            controllerAs: 'register',
+            authenticated: true
+    })
+
      .when('/profile', {
         templateUrl: 'app/views/pages/Admin/profile.html',
         authenticated: true
@@ -103,6 +111,7 @@ var app = angular.module('appRoutes', ['ngRoute'])
 
         })
 
+        
        
 
     

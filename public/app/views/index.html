@@ -32,7 +32,7 @@
     <script src="app/services/authServices.js"></script>
 
 
-   
+       
     
 
         <!-- Custom styles for this template -->
@@ -43,6 +43,8 @@
         <!-- MAIN CSS -->
         <link rel="stylesheet" href="assets/css/main.css">
 
+        <link rel="stylesheet" type="text/css" href="assets/stleyzz.css">
+        <link rel="stylesheet" type="text/css" href="assets/mdb.css">
 
         <link rel="stylesheet" type="text/css" href="assetszz/css/animate.css">
 
@@ -50,13 +52,18 @@
 
 </head>
 
-<body ng-app="userApp" ng-controller="mainCtrl as main" ng-show="main.loadme" ng-cloak>
-   
+<body ng-app="userApp" ng-controller="mainCtrl as main" ng-show="main.loadme"  
+ ng-cloak>
 
-<!-- login -->
-                <div ng-show="!main.isLoggedIn" >
+               
+                    
 
-                  <div  id="wrapper">
+
+                    <div ng-show="!main.isLoggedIn && main.login"  >
+
+                        <div id="login">
+                            
+                              <div  id="wrapper"  >
                         <div class="vertical-align-wrap" style="margin-top: 100px;">
                             <div class="vertical-align-middle">
                                 <div class="auth-box ">
@@ -78,7 +85,7 @@
                                         <form class="form-auth-small" name="sentMessage" id="contactForm" ng-submit="main.doLogin(loginData);" novalidate>
                                                 <div class="form-group">
                                                     <label for="signin-email" class="control-label sr-only">Email</label>
-                                                    <input type="email" class="form-control" id="signin-email"  placeholder="Email"  ng-model="main.loginData.email" autocomplete="off">
+                                                    <input type="email" class="form-control"   placeholder="Email"  ng-model="main.loginData.email" autocomplete="off">
                                                 </div>
 
                                                 <div class="form-group">
@@ -95,14 +102,15 @@
                                             <button  class="btn btn-primary btn-lg btn-block"
                                                 type="submit">LOGIN</button>
                                                 
-                                                <div class="bottom">
-                                                    <span class="helper-text"><i class="fa fa-lock"></i> <a href="#">Forgot password?</a></span>
+                                                <div class="bottom" >
+
+                                                    <span class="helper-text"><i class="fa  fa-lock"></i> <a href="#"  ng-click="main.showforget()" >Forgot password?</a></span>
                                                 </div>
 
 
-                                                <div class="bottom">
+                                                <div class="bottom"  ng-model="selection">
                                                     <span class="text-success"><i class="fa fa-check"></i> 
-                                                        <a href="#" class="text-success">
+                                                        <a href="#" ng-click="main.showactivate()" class="text-success">
                                                             <small>
                                                                 Activate license Key
                                                             </small>
@@ -126,14 +134,138 @@
                         </div>
                     </div>
                     <!-- END WRAPPER -->
+
+                        </div>
+                
                 </div>
             
 
 
+
+
+           
+
+                    <div ng-show="!main.isLoggedIn && main.forget">
+                  <div  id="wrapper" >
+                        <div class="vertical-align-wrap" style="margin-top: 100px;">
+                            <div class="vertical-align-middle">
+                                <div class="auth-box ">
+                                    <div class="left">
+                                        <div class="content">
+                                            <div class="header">
+                                                <div class="logo text-center">
+                                                    <h3> City Kruiz</h3>
+                                                </div>
+                                                <p class="lead">Reset Password</p>
+                                            </div>
+
+                                            
+                        <!-- Custom Messages -->
+                        <div class="row show-hide-message" ng-show="main.successMsg || main.errorMsg || facebook.errorMsg || twitter.errorMsg || google.errorMsg">
+                            <div ng-class="alert">{{ main.successMsg || main.errorMsg || facebook.errorMsg || twitter.errorMsg || google.errorMsg }}</div>&nbsp
+                            
+                        </div>
+                                        <form class="form-auth-small" name="sentMessage"  ng-submit="main.doReset(resetData);" novalidate>
+                                                <div class="form-group">
+                                                    <label for="signin-email" class="control-label sr-only">Email</label>
+                                                    <input type="email" class="form-control"  
+                                                    name="email" placeholder="Email " ng-model="main.resetData.email" autocomplete="off">
+                                                </div>
+
+                                                <button  class="btn btn-primary btn-lg btn-block"
+                                                type="submit">Send Reset Link</button>
+                                           
+                                                
+                                                <div class="bottom"  >
+                                                    <span class="helper-text"><i class="fa fa-lock"></i> <a href="#" ng-click="main.showlogin()"> Remeber Password ? login</a></span>
+                                                </div>
+
+
+                                                
+                                            </form>
+                                        </div>
+                                    </div>
+                                    <div class="right">
+                                        <div class="overlay"></div>
+                                        <div class="content text">
+                                            
+                                        </div>
+                                    </div>
+                                    <div class="clearfix"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- END WRAPPER -->
+                </div>
+                </div>
                   
 
 
 
+                
+
+                    <div ng-show="!main.isLoggedIn && main.activate">
+                  <div  id="wrapper" >
+                        <div class="vertical-align-wrap" style="margin-top: 100px;">
+                            <div class="vertical-align-middle">
+                                <div class="auth-box ">
+                                    <div class="left">
+                                        <div class="content">
+                                            <div class="header">
+                                                <div class="logo text-center">
+                                                    <h3> City Kruiz</h3>
+                                                </div>
+                                                <p class="lead">Activate Account</p>
+                                            </div>
+
+                                            
+                        <!-- Custom Messages -->
+                        <div class="row show-hide-message" ng-show="main.successMsg || main.errorMsg || facebook.errorMsg || twitter.errorMsg || google.errorMsg">
+                            <div ng-class="alert">{{ main.successMsg || main.errorMsg || facebook.errorMsg || twitter.errorMsg || google.errorMsg }}</div>&nbsp
+                            
+                        </div>
+                                        <form class="form-auth-small" name="sentMessage"  ng-submit="main.doLogin(loginData);" novalidate>
+                                                <div class="form-group">
+                                                    <label for="signin-email" class="control-label sr-only">Email</label>
+                                                    <input type="email" class="form-control"   placeholder="Enter license code"  ng-model="main.loginData.email" autocomplete="off">
+                                                </div>
+
+                                                <button  class="btn btn-primary btn-lg btn-block"
+                                                type="submit">License </button>
+                                           
+                                                
+                                                <div class="bottom" >
+                                                    <span class="helper-text"><i class="fa fa-lock"></i> <a href="#" ng-click="main.showlogin()"> Already Authenticated ? login</a></span>
+                                                </div>
+
+
+                                                
+                                            </form>
+                                        </div>
+                                    </div>
+                                    <div class="right">
+                                        <div class="overlay"></div>
+                                        <div class="content text">
+                                            
+                                        </div>
+                                    </div>
+                                    <div class="clearfix"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- END WRAPPER -->
+                </div>
+                </div>
+
+
+
+
+
+
+<!-- login -->
+                
 
    
 
@@ -189,7 +321,7 @@
                 <nav>
                     <ul class="nav">
                         <li><a href="/home" class="active"><i class="lnr lnr-home"></i> <span>Home</span></a></li>
-                        <li><a href="/user" class=""><i class="lnr lnr-user"></i> <span>User</span></a></li>
+                        <li><a href="/user" class=""><i class="lnr lnr-user"></i> <span>Management</span></a></li>
                         <li><a href="/genstat" class=""><i class="fa fa-line-chart"></i> <span>Statistics</span></a></li>
                         <li><a href="#" class=""><i class="lnr lnr-cog"></i> <span>Settings</span></a></li>
                         
@@ -225,6 +357,26 @@
         </div>
     </div>
 
+<!-- modak for reset password -->
+<div id="myModal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+
+    <!-- Modal content-->
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Modal Header</h4>
+      </div>
+      <div class="modal-body">
+        <p>Some text in the modal.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+
+  </div>
+</div>
    
 
    <div ng-view></div>
@@ -240,10 +392,16 @@
 
 
 
-<script type="assets/scripts/scripts.js"></script>
+    
+
 
    <script src="assets/vendor/jquery/jquery.min.js"></script>
     <script src="assets/vendor/bootstrap/js/bootstrap.min.js"></script>
+
+    <script src="assets/scripts/mdb.js"></script>
+
+    <!-- <script src="assets/scripts/scripts.js"></script>
+ -->
     <script src="assets/vendor/jquery-slimscroll/jquery.slimscroll.min.js"></script>
     <script src="assets/vendor/jquery.easy-pie-chart/jquery.easypiechart.min.js"></script>
     <script src="assets/vendor/chartist/js/chartist.min.js"></script>

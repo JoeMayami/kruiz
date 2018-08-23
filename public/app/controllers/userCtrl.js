@@ -12,8 +12,12 @@ angular.module('userControllers', ['userServices'])
 
     // app.getId = $location.search('');
 
-     app.items = [ { value: 'admin', display: 'Admin' }, { value: 'Sub-admin', display: 'Sub-admin' }, { value: 'Franchise', display: 'Franchise' }, { value: 'Driver', display: 'Driver' }];
-    // $scope.selection = app.items[0];
+
+    app.License_items = [{ value: 'Franchise', display: 'Franchise' }, { value: 'Owner', display: 'Owner' }];
+    app.Admin_items = [{ value: 'Admin', display: 'Admin' }, { value: 'Sub-admin', display: 'Sub-admin' }];
+    $scope.Admin_selection = app.Admin_items[0];
+
+     $scope.License_selection = app.License_items[0];
 
  // app.items = [ { value: 'Admin', display: 'Admin' }, { value: 'Sub-admin', display: 'Sub-admin' }, { value: 'Franchise', display: 'Franchise' }, { value: 'Driver', display: 'Driver' }, { value: 'User', display: 'User' }];
 
@@ -128,6 +132,12 @@ angular.module('userControllers', ['userServices'])
             }
         });
     };
+
+
+
+
+
+
 
     this.regCar = function(regData) {
         app.disabled = true; // Disable the form when user submits to prevent multiple requests to server
