@@ -703,40 +703,51 @@ module.exports = function(router) {
 //     });
 
 //     // Route to get the current user's permission level
-//     router.get('/permission', function(req, res) {
+    router.get('/permission', function(req, res) {
 
-//         try {
-//        const mDatabase =  firebase.database().ref('/users/')
-//        mDatabase.on('value', function(snapshot){
-//         const mUserID = req.decoded.uid;
-//        snapshot.forEach(function(childSnapshot) {
-//                          var mUser = childSnapshot.key;
-//                          var mUserData = childSnapshot.val();           
-//              // ..
-//                          if(mUser === mUserID){
-//                             const mMainUser = mUserData;
-//                             if(mMainUser == null){
-//                                 console.log('No user Found');
-//                                 res.json({ success: false, message: 'No user found' }); // Return error
-//                             } else {
-//                                     if(mUser == null){
-//                                         console.log('User not Found');
-//                                         res.json({ success: false, message: 'Users not found' }); // Return error
-//                                     } else {
-//                                         console.log('Return User with user permission');
-//                                         res.json({ success: true, permission: mMainUser.role }); // Return users, along with current user's permission
-//                                     }     
-//                             }
-//                          }
-//            return;          
-//      });
-        
-//  });
-//      } catch (error){
-//      res.json({ success: false, message: 'Something went wrong. This error has been logged and will be addressed by our staff. We apologize for this inconvenience!' });
-//         console.log('Error' + error);
-//     };
-//  });
+     const rootRef =  firebase.database().ref('/users/');
+     
+
+ firebase.auth().onAuthStateChanged(function(user) {
+
+               if (user) {
+
+                   var getUser = firebase.auth().currentUser;
+                  var mUserID = getUser.uid;
+
+         rootRef.once("value").then(function(snapshot) {
+
+                      const mainUser = snapshot.child(mUserID);
+                      const userObject = mainUser.val();
+                      const role = userObject.role;
+
+                            if (role !=null) {
+                                                   res.json({ success: true, permission: role });
+                                              }
+
+                                              else{
+                                                   res.json({ success: false, message: 'Cannot find permission' });
+                                              }
+
+                            res.json({ success: false, message: "Error Catch:2 " + errorMessage });
+           
+          });
+                
+
+                } else {
+
+               res.json({ success: false, message: "user not found" });
+               console.log("JApa");
+
+                 }
+      
+
+
+      
+
+ });
+
+})
 
 //     // Route to get all users for management page
     router.get('/management', function(req, res) {
