@@ -10,6 +10,12 @@ angular.module('userControllers', ['userServices'])
 
     var app = this;
 
+      app.disabled = true; // Disable the form when user submits to prevent multiple requests to server
+        app.loading = true; // Activate bootstrap loading icon
+        app.errorMsg = false; // Clear errorMsg each time user submits
+
+        app.successMsg=false; 
+
     // app.getId = $location.search('');
 
 
@@ -77,9 +83,9 @@ angular.module('userControllers', ['userServices'])
                             }
 
 
-                            else{
+                            else{  
 
-                            app.successMsg = data.data.message  + data.data.permission + '...Redirecting'; // If successful, grab message from JSON object and redirect to login page
+                            app.successMsg = data.data.message  + data.data.role + '...Redirecting'; // If successful, grab message from JSON object and redirect to login page
                             // Redirect after 2000 milliseconds (2 seconds)
                             
                                 $location.path('/user');
@@ -134,6 +140,48 @@ angular.module('userControllers', ['userServices'])
     };
 
 
+this.generateLicense = function(regData) {
+        app.disabled = true; // Disable the form when user submits to prevent multiple requests to server
+        app.loading = true; // Activate bootstrap loading icon
+        app.errorMsg = false; // Clear errorMsg each time user submits
+
+        app.successMsg=false; 
+  
+        if (regData) {
+           
+            User.generateLicense(app.regData).then(function(data) {
+                // Check if user was saved to database successfully
+                if (data.data.success) {
+
+                   
+                    app.loading = false; // Stop bootstrap loading icon
+                    $scope.alert = 'alert alert-success'; // Set class for message
+        
+
+                    app.successMsg = data.data.message + '...Redirecting'; 
+                      $timeout(function() {
+                 
+
+                          $location.path( "/adduser");
+
+                    }, 2000);
+
+
+
+                    } 
+                        else {
+                    app.loading = false; // Stop bootstrap loading icon
+                    app.disabled = false; // If error occurs, remove disable lock from form
+                    $scope.alert = 'alert alert-danger'; // Set class for message
+                    app.errorMsg = data.data.message; // If not successful, grab message from JSON object
+                }
+                    
+            });
+                                  
+             }
+    };
+
+        
 
 
 

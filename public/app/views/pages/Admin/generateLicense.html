@@ -23,15 +23,6 @@
 								<div class="panel-body">
 
 									 <form class="needs-validation" name="regForm" ng-submit="register.generateLicense(licenseData);" id="contactForm" novalidate>
-
-
-									 	
-									
-									
-
-
-
-									<div>
 										
 
 				
@@ -43,7 +34,7 @@
 
 									          <label for="Select">Select User Role</label>
 									<select class="form-control" 
-									 name="role" ng-model="register.licenseData.role" ng-disabled="register.disabled"  >
+									 name="role" ng-model="register.licenseData.role"   >
 
 										 <option ng-repeat="item in register.License_items" value="{{item.value}}">{{item.display}}</option>
 										

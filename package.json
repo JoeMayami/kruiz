@@ -27,6 +27,7 @@
     "firebase-admin": "^6.0.0",
     "firebase-functions": "^2.0.5",
     "jsonwebtoken": "^7.1.9",
+    "moment": "^2.22.2",
     "mongoose": "^4.6.0",
     "mongoose-title-case": "0.0.4",
     "mongoose-validator": "^1.2.5",
@@ -37,6 +38,8 @@
     "passport": "^0.3.2",
     "passport-facebook": "^2.1.1",
     "passport-google-oauth": "^1.0.0",
-    "passport-twitter": "^1.0.4"
+    "passport-twitter": "^1.0.4",
+    "paystack": "^2.0.1",
+    "paystack-api": "^1.0.3"
   }
 }

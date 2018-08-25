@@ -9,7 +9,10 @@ var app = angular.module('appRoutes', ['ngRoute'])
     // Route: Home             
         .when('/', {
          templateUrl: 'app/views/pages/Admin/home.html',
-        authenticated: true
+         ontroller: 'mainCtrl',
+            controllerAs: 'main',
+
+            authenticated: true
     })
 
        
@@ -79,8 +82,7 @@ var app = angular.module('appRoutes', ['ngRoute'])
 
      .when('/user', {
         templateUrl: 'app/views/pages/Admin/user.html',
-        controller: 'managementCtrl',
-        controllerAs: 'management',
+       
         authenticated: true
        
     })

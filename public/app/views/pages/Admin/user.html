@@ -1,13 +1,28 @@
 
 			<!-- MAIN -->
-			<div class="main">
+			<div class="main" ng-controller="managementCtrl as management">
 				<!-- MAIN CONTENT -->
 				<div class="main-content">
 					<div class="container-fluid">
 
+
+
 						<h3 class="page-title" style="display: inline; margin-top: -15px;">Users </h3>
 
-						<h3 class="page-title" style="display: inline">Users </h3>
+						<div>   
+
+
+							<div class="row show-hide-message" ng-show="management.successMsg || management.errorMsg || management.terrorMsg || facebook.errorMsg || twitter.errorMsg || google.errorMsg">
+                            <div ng-class="alert">{{ management.successMsg || management.errorMsg ||management.terrorMsg || facebook.errorMsg || twitter.errorMsg || google.errorMsg }}</div>&nbsp
+                            
+                        </div>
+
+						<!-- 	<p> error </p> -->
+							<!-- <p> {{management.terrorMsg}}</p> -->
+							<p> {{management.tempString}}</p>
+							<p> {{management.data}}</p>
+
+						</div>
 
 						<a href="/adduser" style="margin-top: -15px; margin-left: 10px;" class="btn btn-primary pull-right">Add Admin</a>
 
@@ -24,16 +39,19 @@
 												<tr>
 													<th> Name</th>
 													<th>Last Activity</th>
-													<th>Phone</th>
-													<th>Email</th>
+													<th>Role</th>
+													<th>Account</th>
 													
 													<th> Edit </th>
 													<th> Delete </th>
 
+
 												</tr>
 											</thead>
 							<tbody>
-								<tr  ng-repeat="person in management.users ">
+
+
+								<tr  ng-repeat="person in management.data ">
 
 
 									<td>
@@ -42,7 +60,7 @@
 										<img src="assets/img/man3.png" class="img-circle">
 										</div>
 											<div class="col-md-3">
-												<strong>{{ person.name }}</strong>
+												<strong>{{ person.email }}</strong>
 
 												</div>
 
@@ -52,9 +70,9 @@
 											<td><i class="fas fa-clock"></i>
 
 											<small>Online now!</small></td>
-											<td>{{ person.username }}</td>
+											<td>{{ person.role }}</td>
 
-											<td>{{ person.email }}</td>
+											<td>{{ person.status }}</td>
 
 											<td>
 			                <!-- Edit Button -->
@@ -63,7 +81,7 @@
 			                </a>
 			            </td>
 
-			            <td>
+			           <!--  <td> -->
 			                <!-- Delete Button -->
 			                <button type="button" ng-click="management.deleteUser(person.username);" ng-show="management.deleteAccess" class="btn btn-danger">Delete</button>
 			            </td>
@@ -79,8 +97,8 @@
 												
 											</tbody>
 										</table>
-									</div>
-								</div>
+									<!-- </div>
+								</div> -->
 								<!-- END BASIC TABLE -->
 							</div>
 							

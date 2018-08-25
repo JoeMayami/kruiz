@@ -9,9 +9,17 @@ angular.module('userServices', [])
         return $http.post('/api/users', regData);
     };
 
+
+   
       userFactory.generateLicense = function(licenseData) {
         return $http.post('/api/License', licenseData);
     };
+
+
+     userFactory.getTransactionList = function() {
+        return $http.post('/api/getTransactionList');
+    };
+
 
     userFactory.getResetLink = function(resetData) {
         return $http.post('/api/getresetlink', resetData);

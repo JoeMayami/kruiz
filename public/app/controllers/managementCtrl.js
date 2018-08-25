@@ -1,8 +1,12 @@
-angular.module('managementController', [])
+angular.module('managementController', ['userServices'])
 
 // Controller: User to control the management page and managing of user accounts
 .controller('managementCtrl', function(User, $scope) {
     var app = this;
+
+
+
+
 
     app.loading = true; // Start loading icon on page load
     app.accessDenied = true; // Hide table while loading
@@ -14,20 +18,55 @@ angular.module('managementController', [])
 
     // Function: get all the users from database
     function getUsers() {
-        // Runs function to get all the users from database
+        // Runs function to get all the users from database 
+       
         User.getUsers().then(function(data) {
             // Check if able to get data from database
+
+
+            
             if (data.data.success) {
-                // Check which permissions the logged in user has
-                if (data.data.permission === 'admin' || data.data.permission === 'moderator') {
+
+                    // ids get all dataids that are passed
+                    let ids = data.data.user_id;
+
+                    app.tempString = [];
+             
+                // converted data
+                    conUserData = Object.values(data.data.users);
+
+                    app.data = conUserData;
+
+                for(i = 0; i < ids.length; i++){
+
+                    //creates a template string used tranverse the user data
+                    const ts = "users."+ids[i];
+
+                    // pushes the ts to an array
+                    app.tempString.push(ts);
+
+                  
+
+                }
+
+
+
+
+
+                if (data.data.conUserData.role === 'Admin' || data.data.conUserData.role === 'Moderator') {
                     app.users = data.data.users; // Assign users from database to variable
+                    
+
+                    app.status = data.data.status;
+                    app.email= data.data.email;
+
                     app.loading = false; // Stop loading icon
                     app.accessDenied = false; // Show table
                     // Check if logged in user is an admin or moderator
-                    if (data.data.permission === 'admin') {
+                    if (data.data.role === 'Admin') {
                         app.editAccess = true; // Show edit button
                         app.deleteAccess = true; // Show delete button
-                    } else if (data.data.permission === 'moderator') {
+                    } else if (data.data.role === 'Moderator') {
                         app.editAccess = true; // Show edit button
                     }
                 } else {
@@ -138,8 +177,8 @@ angular.module('managementController', [])
             $scope.newName = data.data.user.name; // Display user's name in scope
             $scope.newEmail = data.data.user.email; // Display user's e-mail in scope
             $scope.newUsername = data.data.user.username; // Display user's username in scope
-            $scope.newPermission = data.data.user.permission; // Display user's permission in scope
-            app.currentUser = data.data.user._id; // Get user's _id for update functions
+            $scope.newPermission = data.data.user.role; // Display user's permission in scope
+            app.currentUser = data.data.user_id; // Get user's _id for update functions
         } else {
             app.errorMsg = data.data.message; // Set error message
             $scope.alert = 'alert alert-danger'; // Set class for message
@@ -200,11 +239,11 @@ angular.module('managementController', [])
         app.disableAdmin = false; // Disable buttons while processing
         app.errorMsg = false; // Clear any error messages
         // Check which permission was set and disable that button
-        if ($scope.newPermission === 'user') {
+        if ($scope.newPermission === 'User') {
             app.disableUser = true; // Disable 'user' button
-        } else if ($scope.newPermission === 'moderator') {
+        } else if ($scope.newPermission === 'Moderator') {
             app.disableModerator = true; // Disable 'moderator' button
-        } else if ($scope.newPermission === 'admin') {
+        } else if ($scope.newPermission === 'Admin') {
             app.disableAdmin = true; // Disable 'admin' button
         }
     };
@@ -332,15 +371,15 @@ angular.module('managementController', [])
                     app.successMsg = false; // Set success message
                     $scope.newPermission = newPermission; // Set the current permission variable
                     // Check which permission was assigned to the user
-                    if (newPermission === 'user') {
+                    if (newPermission === 'User') {
                         app.disableUser = true; // Lock the 'user' button
                         app.disableModerator = false; // Unlock the 'moderator' button
                         app.disableAdmin = false; // Unlock the 'admin' button
-                    } else if (newPermission === 'moderator') {
+                    } else if (newPermission === 'Moderator') {
                         app.disableModerator = true; // Lock the 'moderator' button
                         app.disableUser = false; // Unlock the 'user' button
                         app.disableAdmin = false; // Unlock the 'admin' button
-                    } else if (newPermission === 'admin') {
+                    } else if (newPermission === 'Admin') {
                         app.disableAdmin = true; // Lock the 'admin' buton
                         app.disableModerator = false; // Unlock the 'moderator' button
                         app.disableUser = false; // unlock the 'user' button

@@ -39,7 +39,7 @@ app.showforget = function() {
         // Check if a the token expired
         Auth.getUser().then(function(data) {
             // Check if the returned user is undefined (expired)
-            if (data.data.username === undefined) {
+            if (data.data.uid === undefined) {
                 Auth.logout(); // Log the user out
                 app.isLoggedIn = false; // Set session to false
                 $location.path('/'); // Redirect to home page
@@ -169,7 +169,7 @@ app.showforget = function() {
                     checkLoginStatus = data.data.email;
                     app.useremail = data.data.email; // Get the user e-mail for us ein index
                     User.getPermission().then(function(data) {
-                        if (data.data.permission === 'Admin' || data.data.permission === 'moderator') {
+                        if (data.data.role === 'Admin' || data.data.role === 'moderator') {
                             app.authorized = true; // Set user's current permission to allow management
                             app.loadme = true; // Show main HTML now that data is obtained in AngularJS
                         } else {
@@ -260,9 +260,7 @@ app.showforget = function() {
     };
 
 
-
-
-
+    
     this.regProfile = function(regData) {
         app.disabled = true; // Disable the form when user submits to prevent multiple requests to server
         app.loading = true; // Activate bootstrap loading icon
@@ -288,14 +286,14 @@ app.showforget = function() {
                     
 
                     
-                    app.successMsg = data.data.message + '...Redirecting'; // If successful, grab message from JSON object and redirect to login page
+                    app.successMsg = data.data.message + '...Redirecting' + data.data.email; // If successful, grab message from JSON object and redirect to login page
                     // Redirect after 2000 milliseconds (2 seconds)
                     $timeout(function() {
                  
 
                           $location.path( "/setbank/user=" + data.data.id );
 
-                    }, 2000);
+                    }, 50000);
                 } else {
                     app.loading = false; // Stop bootstrap loading icon
                     app.disabled = false; // If error occurs, remove disable lock from form
@@ -577,6 +575,45 @@ app.showforget = function() {
             }
         });
     };
+
+
+                                   
+// #####################################################################################################
+// ################################################### PAY STACK API REFERENCE TO FRONTEND##################################################
+// #####################################################################################################
+// #####################################################################################################
+
+
+
+ this.getTranscationList = function(transData) {
+       
+        
+
+        // Runs custom function that checks if username is available for user to use
+        User.getTranscationList(app.regData).then(function(data) {
+            
+            if (data.data.success) {
+                app.checkingDisplayname = false; // Stop bootstrap loading icon
+                app.transData = data.data.transObject; // If successful, grab message from JSON object
+            } else {
+                app.checkingDisplayname = false; // Stop bootstrap loading icon
+                app.displaynameInvalid = true; // User variable to let user know that the chosen username is taken already
+                app.transData = data.data.error; // If not successful, grab message from JSON object
+            }
+        });
+    };
+
+
+
+
+
+
+// #####################################################################################################
+// ###############################################  END OF PAYSTACK ######################################################
+// #####################################################################################################
+// #####################################################################################################
+                                          
+
 
     // Function to logout the user
     app.logout = function() {
