@@ -570,7 +570,12 @@ if(  mainUser == null){
 });
 
 
+// ME
+router.post('/me', function(req, res) {
+   
+  res.send(req.decoded); // Return the token acquired from middleware
 
+});
 
 
 //PERMISSION ROUTING
@@ -609,7 +614,7 @@ if(  mainUser == null){
                 } else {
 
                res.json({ success: false, message: "user not found" });
-               console.log("JApa");
+               console.log("User not Found");
 
                  }
       
@@ -634,6 +639,8 @@ if(  mainUser == null){
 
 
 
+ 
+ 
 
 
 
