@@ -97,44 +97,57 @@ module.exports = function(router) {
 
   });
 
-//VALIDATING LICENSE KEY
-router.get('/validlicense', function(req, res){
-var licenseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJSb2xlIjoiQWRtaW4iLCJzdWJQZXJpb2QiOiIxIiwiaWF0IjoxNTM1MTYxMDcwfQ.fZWkmnSSiCWEHXkO8UCzQTUyJ51f_LANHka50G1VBOY";
-if (licenseKey != null){
-  const rootRef =  firebase.database().ref('/license/').orderByChild("licenseKey").equalTo(licenseKey);
-  rootRef.once("value").then(function(snapshot){
-    const idData = snapshot.val();
-    keyID = Object.keys(idData);
-    key = snapshot.child(keyID).child("licenseKey").val();
-    // res.json({ success: true, message: "Valid License Key" + key });   
-if (key === licenseKey){
-  var status = snapshot.child(keyID).child("status").val();
-  if (status == "fresh"){
-    //Fresh Activation
-    firebase.database().ref('license/' + keyID).update({
-      status : "Active"
-    }).then(success =>{
-           //Activate License Key
-      //Call the registration api passing this data to it
-      var role = snapshot.child(keyID).child("role").val();
-      res.json({ success: true, message: "New Management Activation" });
-    }). catch(function(error){
-      res.json({ success: false, message: "An Error Occured: " + error });
-    });
-    res.json({ success: true, message: "Fresh Activation" });
-  } else {
-    var limit = snapshot.child(keyID).child("limit").val();
-    var users = snapshot.child(keyID).child("users").val();
-    if (limit >= users) {
 
-      res.json({ success: false, message: "Your License Key has exceeded it limit" });
-      
-    } else {
-      //Activate License Key
-      //Update Limit
-      updateLimit = limit + 1;
+  //VERIFY TOKEN
+  router.post('/verifyToken', function(req, res){
+    var licenseKey = req.body.licenseKey;
+    jwt.verify(licenseKey, secret, function(err, decoded){
+
+      if(err) {
+          res.json({success: false, message: 'Tokend invalid'});
+  
+      }
+      else {
+          req.decoded = decoded;
+          res.json({success: true, message: req.decoded.Role});
+      }
+  })
+
+  });
+
+//VALIDATING LICENSE KEY
+router.post('/validlicense', function(req, res){
+  var licenseKey = req.body.licenseKey;
+if (licenseKey != null){
+
+  jwt.verify(licenseKey, secret, function(err, decoded){
+
+    if(err) {
+        res.json({success: false, message: 'Tokend invalid'});
+
+    }
+    else {
+         const rootRef =  firebase.database().ref('/license/').orderByChild("licenseKey").equalTo(licenseKey);
+    rootRef.once("value")
+    .catch (function(error){
+      res.json({success:false, message: "An error occured LOG " + error});
+    })
+    .then(function(snapshot){
+      const idData = snapshot.val();
+      keyID = Object.keys(idData);
+    key = snapshot.child(keyID).child("licenseKey").val();
+
+ try {
+  if (key != licenseKey){
+
+    res.json({ success: false, message: "Invalid License Key" });
+    
+  } else {
+    var status = snapshot.child(keyID).child("status").val();
+    if (status == "fresh"){
+      //Fresh Activation
       firebase.database().ref('license/' + keyID).update({
-        limit : updateLimit
+        status : "Active"
       }).then(success =>{
              //Activate License Key
         //Call the registration api passing this data to it
@@ -143,13 +156,42 @@ if (key === licenseKey){
       }). catch(function(error){
         res.json({ success: false, message: "An Error Occured: " + error });
       });
+      res.json({ success: true, message: "Fresh Activation" });
+    } else {
+      var limit = snapshot.child(keyID).child("limit").val();
+      var users = snapshot.child(keyID).child("users").val();
+      if (limit >= users) {
+  
+        res.json({ success: false, message: "Your License Key has exceeded it limit" });
+        
+      } else {
+        //Activate License Key
+        //Update Limit
+        updateLimit = limit + 1;
+        firebase.database().ref('license/' + keyID).update({
+          limit : updateLimit
+        }).then(success =>{
+               //Activate License Key
+          //Call the registration api passing this data to it
+          var role = snapshot.child(keyID).child("role").val();
+          res.json({ success: true, message: "New Management Activation" });
+        }). catch(function(error){
+          res.json({ success: false, message: "An Error Occured: " + error });
+        });
+      }
     }
-  }
-  res.json({ success: true, message: key });
-} else {
-  res.json({ success: false, message: "Invalid License Key" });  
-};        
+    res.json({ success: true, message: key });
+  };
+
+ } catch(error) {
+    res.json({success:false, message:"An error occured: " + error});
+ }
+
+    }); 
+    }
 });
+ 
+
 } else {
   res.json({success:false, message:"Fields are empty"});
 }
